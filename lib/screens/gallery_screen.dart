@@ -7,6 +7,11 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import '../providers/wedding_provider.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:ui_web' as ui;
+
+import 'package:flutter/material.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String slug;
@@ -133,7 +138,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    BookFlipScreen(photos: photos),
+                                    FlipBookHtml(photos: photos),
                               ),
                             );
                           },
@@ -161,131 +166,74 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
 
 
+class FlipBookHtml extends StatefulWidget {
 
-class BookFlipScreen extends StatefulWidget {
   final List photos;
 
-  const BookFlipScreen({super.key, required this.photos});
+  const FlipBookHtml({
+    super.key,
+    required this.photos,
+  });
 
   @override
-  State<BookFlipScreen> createState() => _BookFlipScreenState();
+  State<FlipBookHtml> createState() => _FlipBookHtmlState();
 }
 
-class _BookFlipScreenState extends State<BookFlipScreen>
-    with TickerProviderStateMixin {
-  int currentSheet = 0;
+class _FlipBookHtmlState extends State<FlipBookHtml> {
 
-  late List<List> sheets;
+  late final String viewId;
 
   @override
   void initState() {
+
     super.initState();
 
-    /// 👉 2 pages per sheet
-    sheets = [];
-    for (int i = 0; i < widget.photos.length; i += 2) {
-      sheets.add(widget.photos.sublist(
-          i, i + 2 > widget.photos.length ? widget.photos.length : i + 2));
-    }
-  }
+    viewId =
+    "flipbook-${DateTime.now().millisecondsSinceEpoch}";
 
-  void next() {
-    if (currentSheet < sheets.length) {
-      setState(() => currentSheet++);
-    }
-  }
+    final jsonPhotos =
+    Uri.encodeComponent(jsonEncode(widget.photos));
 
-  void prev() {
-    if (currentSheet > 0) {
-      setState(() => currentSheet--);
-    }
+    // ignore: undefined_prefixed_name
+    ui.platformViewRegistry.registerViewFactory(
+      viewId,
+          (int viewId) {
+
+        final iframe = html.IFrameElement()
+
+        /// ✅ FIXED
+          ..src = "/flipbook.html?data=$jsonPhotos"
+
+          ..style.border = "none"
+
+          ..style.width = "100%"
+
+          ..style.height = "100%";
+
+        return iframe;
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: const Color(0xfff4f1ea),
-      body: Center(
-        child: Stack(
-          children: List.generate(sheets.length, (index) {
-            bool flipped = index < currentSheet;
 
-            return Positioned.fill(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeInOut,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(flipped ? -pi : 0),
-                transformAlignment: Alignment.centerLeft,
-                child: _buildSheet(sheets[index], index),
-              ),
-            );
-          }).reversed.toList(), // zIndex logic
-        ),
-      ),
+      backgroundColor: Colors.black,
 
-      /// CONTROLS
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton(onPressed: prev, child: const Text("Prev")),
-            ElevatedButton(onPressed: next, child: const Text("Next")),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 🔥 SHEET (2 PAGE)
-  Widget _buildSheet(List sheet, int index) {
-    return Row(
-      children: [
-        /// FRONT PAGE
-        Expanded(
-          child: _page(sheet[0], isFront: true),
-        ),
-
-        /// BACK PAGE
-        Expanded(
-          child: Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()..rotateY(pi),
-            child: sheet.length > 1
-                ? _page(sheet[1], isFront: false)
-                : Container(color: Colors.white),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 🔥 SINGLE PAGE UI
-  Widget _page(Map photo, {required bool isFront}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.black12),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 15,
-            color: Colors.black12,
-          )
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: CachedNetworkImage(
-          imageUrl: photo['imageUrl'],
-          fit: BoxFit.cover,
-        ),
+      body: HtmlElementView(
+        viewType: viewId,
       ),
     );
   }
 }
 
+
+
+//
+//
+//
 // class FlipBookScreen extends StatefulWidget {
 //   final List photos;
 //

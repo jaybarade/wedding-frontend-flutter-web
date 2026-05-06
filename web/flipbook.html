@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
+
+    <title>Wedding Album</title>
+
+    <style>
+
+        :root {
+
+            --book-width: 1400px;
+            --book-height: 520px;
+
+            --mobile-width: 95vw;
+            --mobile-height: 320px;
+
+            --bg: #050505;
+        }
+
+        * {
+
+            margin: 0;
+            padding: 0;
+
+            box-sizing: border-box;
+        }
+
+        body {
+
+            width: 100vw;
+            height: 100vh;
+
+            overflow: hidden;
+
+            background:
+                    radial-gradient(circle at center,
+                    #222 0%,
+                    #000 100%);
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, sans-serif;
+        }
+
+        .title {
+
+            color: white;
+
+            letter-spacing: 8px;
+
+            font-size: 24px;
+
+            margin-bottom: 20px;
+        }
+
+        .album-container {
+
+            width: var(--book-width);
+            height: var(--book-height);
+
+            position: relative;
+
+            perspective: 4000px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            transition: .4s;
+        }
+
+        .book {
+
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+
+            transform-style: preserve-3d;
+        }
+
+        .page-left {
+
+            position: absolute;
+
+            width: 50%;
+            height: 100%;
+
+            left: 0;
+            top: 0;
+
+            overflow: hidden;
+
+            background: white;
+
+            border-radius: 8px 0 0 8px;
+
+            box-shadow:
+                    -10px 0 20px rgba(0,0,0,.25);
+        }
+
+        .page-left img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .sheet {
+
+            position: absolute;
+
+            width: 50%;
+            height: 100%;
+
+            left: 50%;
+
+            transform-origin: left;
+
+            transform-style: preserve-3d;
+
+            transition: transform 1.3s ease;
+
+            cursor: pointer;
+        }
+
+        .sheet.flipped {
+
+            transform: rotateY(-180deg);
+        }
+
+        .page {
+
+            position: absolute;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            background: white;
+
+            backface-visibility: hidden;
+
+            border-radius: 0 8px 8px 0;
+
+            box-shadow:
+                    0 0 25px rgba(0,0,0,.45);
+
+            padding: 8px;
+        }
+
+        .front {
+
+            z-index: 2;
+        }
+
+        .back {
+
+            transform: rotateY(180deg);
+        }
+
+        .photo-wrapper {
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            border-radius: 6px;
+        }
+
+        .photo-wrapper img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
+        .cover {
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            #1b1b1b,
+                            #000000
+                    );
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-direction: column;
+
+            color: white;
+        }
+
+        .cover h1 {
+
+            font-size: 60px;
+
+            color: #d4af37;
+
+            margin-bottom: 15px;
+        }
+
+        .cover p {
+
+            color: #ddd;
+
+            letter-spacing: 5px;
+        }
+
+        .controls {
+
+            position: fixed;
+
+            bottom: 25px;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            display: flex;
+
+            gap: 12px;
+
+            z-index: 999;
+        }
+
+        .btn {
+
+            background: rgba(255,255,255,.12);
+
+            backdrop-filter: blur(12px);
+
+            border: 1px solid rgba(255,255,255,.2);
+
+            color: white;
+
+            padding: 14px 18px;
+
+            border-radius: 50px;
+
+            cursor: pointer;
+
+            font-size: 18px;
+
+            transition: .3s;
+        }
+
+        .btn:hover {
+
+            background: rgba(255,255,255,.25);
+        }
+
+        .music-btn {
+
+            position: fixed;
+
+            top: 20px;
+            right: 20px;
+
+            z-index: 999;
+        }
+
+        @media(max-width: 900px){
+
+            .album-container{
+
+                width: var(--mobile-width);
+                height: var(--mobile-height);
+            }
+
+            .cover h1{
+
+                font-size: 28px;
+            }
+
+            .cover p{
+
+                font-size: 12px;
+            }
+
+            .controls{
+
+                bottom: 10px;
+            }
+
+            .btn{
+
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="title">
+
+    WEDDING MEMORIES
+
+</div>
+
+<div class="album-container"
+     id="container">
+
+    <div class="book"
+         id="book"></div>
+
+</div>
+
+<div class="controls">
+
+    <button class="btn"
+            id="prevBtn">
+
+        ⬅
+
+    </button>
+
+    <button class="btn"
+            id="zoomIn">
+
+        ＋
+
+    </button>
+
+    <button class="btn"
+            id="zoomOut">
+
+        －
+
+    </button>
+
+    <button class="btn"
+            id="nextBtn">
+
+        ➡
+
+    </button>
+
+</div>
+
+<button class="btn music-btn"
+        id="musicBtn">
+
+    🎵
+
+</button>
+
+<audio id="bgMusic" loop>
+
+    <source src="assets/audio/wedding.mp3"
+            type="audio/mpeg">
+
+</audio>
+
+<script>
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const data =
+        params.get("data");
+
+    let photos = [];
+
+    if(data){
+
+        const parsed =
+            JSON.parse(data);
+
+        photos =
+            parsed.map(
+                p => p.imageUrl
+            );
+    }
+
+    const book =
+        document.getElementById("book");
+
+    let currentSheet = 0;
+
+    let zoom = 1;
+
+    function createCover(){
+
+        return `
+
+        <div class="page-left">
+
+            <img src="${photos[0]}">
+
+        </div>
+
+        <div class="sheet"
+             style="z-index:${photos.length + 5}">
+
+            <div class="page front cover">
+
+                <h1>OUR STORY</h1>
+
+                <p>Wedding Memories</p>
+
+            </div>
+
+            <div class="page back">
+
+                <div class="photo-wrapper">
+
+                    <img src="${photos[1] || photos[0]}">
+
+                </div>
+
+            </div>
+
+        </div>
+        `;
+    }
+
+    function createSheets(){
+
+        let html = "";
+
+        let z = photos.length;
+
+        for(let i = 2; i < photos.length; i += 2){
+
+            const left = photos[i];
+
+            const right =
+                photos[i + 1] || left;
+
+            html += `
+
+            <div class="sheet"
+                 style="z-index:${z--}">
+
+                <div class="page front">
+
+                    <div class="photo-wrapper">
+
+                        <img src="${left}">
+
+                    </div>
+
+                </div>
+
+                <div class="page back">
+
+                    <div class="photo-wrapper">
+
+                        <img src="${right}">
+
+                    </div>
+
+                </div>
+
+            </div>
+            `;
+        }
+
+        return html;
+    }
+
+    function loadBook(){
+
+        book.innerHTML =
+            createCover() + createSheets();
+
+        initBook();
+    }
+
+    function initBook(){
+
+        const sheets =
+            document.querySelectorAll(".sheet");
+
+        function nextPage(){
+
+            if(currentSheet < sheets.length){
+
+                sheets[currentSheet]
+                    .classList.add("flipped");
+
+                currentSheet++;
+            }
+        }
+
+        function prevPage(){
+
+            if(currentSheet > 0){
+
+                currentSheet--;
+
+                sheets[currentSheet]
+                    .classList.remove("flipped");
+            }
+        }
+
+        document.getElementById("nextBtn")
+            .onclick = nextPage;
+
+        document.getElementById("prevBtn")
+            .onclick = prevPage;
+
+        sheets.forEach(sheet => {
+
+            sheet.addEventListener(
+                "click",
+                (e)=>{
+
+                    const rect =
+                        sheet.getBoundingClientRect();
+
+                    const x =
+                        e.clientX - rect.left;
+
+                    if(x > rect.width / 2){
+
+                        nextPage();
+
+                    }else{
+
+                        prevPage();
+                    }
+                }
+            );
+        });
+    }
+
+    /// ZOOM
+
+    document.getElementById("zoomIn")
+        .onclick = () => {
+
+        zoom += 0.1;
+
+        document.getElementById("container")
+            .style.transform =
+            `scale(${zoom})`;
+    };
+
+    document.getElementById("zoomOut")
+        .onclick = () => {
+
+        zoom -= 0.1;
+
+        if(zoom < 0.5)
+            zoom = 0.5;
+
+        document.getElementById("container")
+            .style.transform =
+            `scale(${zoom})`;
+    };
+
+    /// MUSIC
+
+    const music =
+        document.getElementById("bgMusic");
+
+    let playing = false;
+
+    document.getElementById("musicBtn")
+        .onclick = async () => {
+
+        if(!playing){
+
+            music.volume = 1;
+
+            music.play().catch(() => {
+
+                alert(
+                    "Tap again to enable music"
+                );
+            });
+
+            playing = true;
+
+        }else{
+
+            music.pause();
+
+            playing = false;
+        }
+    };
+
+    loadBook();
+
+</script>
+
+</body>
+</html>
