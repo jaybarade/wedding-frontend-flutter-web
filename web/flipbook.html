@@ -1,613 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8"/>
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0"/>
-
-    <title>Wedding Album</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Premium Wedding Album</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
-
         :root {
-
-            --book-width: 1400px;
-            --book-height: 520px;
-
-            --mobile-width: 95vw;
-            --mobile-height: 320px;
-
-            --bg: #050505;
+            --book-width: 1100px;
+            --book-height: 450px;
+            --page-color: #fffdfa;
+            --gold: #c5a028;
+            --dark-gold: #8e6d10;
+            --spine-color: #2c1e14;
+            --bg-gradient: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
         }
 
         * {
-
             margin: 0;
             padding: 0;
-
             box-sizing: border-box;
         }
 
         body {
-
+            background: var(--bg-gradient);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
             width: 100vw;
             height: 100vh;
-
-            overflow: hidden;
-
-            background:
-                    radial-gradient(circle at center,
-                    #222 0%,
-                    #000 100%);
-
             display: flex;
             flex-direction: column;
-
             align-items: center;
             justify-content: center;
-
-            font-family: Arial, sans-serif;
+            touch-action: none;
         }
 
-        .title {
-
-            color: white;
-
-            letter-spacing: 8px;
-
-            font-size: 24px;
-
-            margin-bottom: 20px;
+        /* Premium Title */
+        .title-container {
+            position: fixed;
+            top: 40px;
+            text-align: center;
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
-        .album-container {
+        .main-title {
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(197, 160, 40, 0.3);
+        }
 
+        .sub-title {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        /* Flipbook Container */
+        .album-wrapper {
+            perspective: 3000px;
             width: var(--book-width);
             height: var(--book-height);
-
             position: relative;
-
-            perspective: 4000px;
-
             display: flex;
-            align-items: center;
             justify-content: center;
-
-            transition: .4s;
+            align-items: center;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .book {
-
+            width: 100%;
+            height: 100%;
             position: relative;
-
-            width: 100%;
-            height: 100%;
-
             transform-style: preserve-3d;
+            transition: transform 0.5s ease;
         }
 
-        .page-left {
-
+        /* Spine Effect */
+        .book::after {
+            content: '';
             position: absolute;
-
-            width: 50%;
-            height: 100%;
-
-            left: 0;
-            top: 0;
-
-            overflow: hidden;
-
-            background: white;
-
-            border-radius: 8px 0 0 8px;
-
-            box-shadow:
-                    -10px 0 20px rgba(0,0,0,.25);
-        }
-
-        .page-left img {
-
-            width: 100%;
-            height: 100%;
-
-            object-fit: cover;
-        }
-
-        .sheet {
-
-            position: absolute;
-
-            width: 50%;
-            height: 100%;
-
             left: 50%;
-
-            transform-origin: left;
-
-            transform-style: preserve-3d;
-
-            transition: transform 1.3s ease;
-
-            cursor: pointer;
+            top: 0;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
+            transform: translateX(-50%) translateZ(10px);
+            pointer-events: none;
+            z-index: 1000;
         }
 
-        .sheet.flipped {
-
-            transform: rotateY(-180deg);
-        }
-
+        /* Individual Page */
         .page {
-
             position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+            cursor: pointer;
+            user-select: none;
+        }
 
+        .page-face {
+            position: absolute;
             width: 100%;
             height: 100%;
-
-            overflow: hidden;
-
-            background: white;
-
+            top: 0;
+            left: 0;
             backface-visibility: hidden;
-
-            border-radius: 0 8px 8px 0;
-
-            box-shadow:
-                    0 0 25px rgba(0,0,0,.45);
-
-            padding: 8px;
+            background: var(--page-color);
+            box-shadow: inset 3px 0 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .front {
-
             z-index: 2;
+            border-radius: 0 5px 5px 0;
         }
 
         .back {
-
             transform: rotateY(180deg);
+            z-index: 1;
+            border-radius: 5px 0 0 5px;
+            box-shadow: inset -3px 0 15px rgba(0,0,0,0.1);
         }
 
-        .photo-wrapper {
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
 
-            width: 100%;
-            height: 100%;
-
+        /* Cover Styling */
+        .cover-front {
+            background: linear-gradient(135deg, #2c1e14 0%, #4a3423 100%) !important;
+            color: var(--gold);
+            position: relative;
             overflow: hidden;
-
-            border-radius: 6px;
+        }
+        
+        .cover-front::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://www.transparenttextures.com/patterns/leather.png');
+            opacity: 0.3;
         }
 
-        .photo-wrapper img {
-
-            width: 100%;
-            height: 100%;
-
-            object-fit: cover;
-
-            display: block;
-        }
-
-        .cover {
-
-            background:
-                    linear-gradient(
-                            135deg,
-                            #1b1b1b,
-                            #000000
-                    );
-
+        .gold-border {
+            position: absolute;
+            inset: 30px;
+            border: 3px double var(--gold);
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            padding: 20px;
+            z-index: 2;
+        }
 
+        .ornament-font {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Full Page Image Styling */
+        .photo-img {
+            width: 200% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            position: absolute;
+            top: 0;
+        }
+
+        .front .photo-img {
+            right: 0;
+            object-position: right center;
+        }
+
+        .back .photo-img {
+            left: 0;
+            object-position: left center;
+        }
+
+        /* Subtle spine shadow on the images */
+        .front::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
+            pointer-events: none;
+        }
+
+        .back::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to left, rgba(0,0,0,0.2), transparent);
+            pointer-events: none;
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            z-index: 200;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
-
-            flex-direction: column;
-
-            color: white;
-        }
-
-        .cover h1 {
-
-            font-size: 60px;
-
-            color: #d4af37;
-
-            margin-bottom: 15px;
-        }
-
-        .cover p {
-
-            color: #ddd;
-
-            letter-spacing: 5px;
-        }
-
-        .controls {
-
-            position: fixed;
-
-            bottom: 25px;
-
-            left: 50%;
-
-            transform: translateX(-50%);
-
-            display: flex;
-
-            gap: 12px;
-
-            z-index: 999;
-        }
-
-        .btn {
-
-            background: rgba(255,255,255,.12);
-
-            backdrop-filter: blur(12px);
-
-            border: 1px solid rgba(255,255,255,.2);
-
-            color: white;
-
-            padding: 14px 18px;
-
-            border-radius: 50px;
-
             cursor: pointer;
-
-            font-size: 18px;
-
-            transition: .3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(8px);
+            font-size: 1.2rem;
         }
 
-        .btn:hover {
-
-            background: rgba(255,255,255,.25);
+        .control-btn:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 10px 20px rgba(197, 160, 40, 0.3);
         }
 
+        .page-num {
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        /* Music Button */
         .music-btn {
-
             position: fixed;
-
-            top: 20px;
-            right: 20px;
-
-            z-index: 999;
+            top: 40px;
+            right: 40px;
+            z-index: 200;
         }
 
-        @media(max-width: 900px){
-
-            .album-container{
-
-                width: var(--mobile-width);
-                height: var(--mobile-height);
-            }
-
-            .cover h1{
-
-                font-size: 28px;
-            }
-
-            .cover p{
-
-                font-size: 12px;
-            }
-
-            .controls{
-
-                bottom: 10px;
-            }
-
-            .btn{
-
-                padding: 10px 14px;
-                font-size: 14px;
+        /* Responsive Improvements */
+        @media (max-width: 1200px) {
+            .album-wrapper {
+                width: 90vw;
+                height: calc(90vw / 2.44);
+                max-height: 60vh;
             }
         }
 
+        @media (max-width: 768px) {
+            .main-title { font-size: 1.5rem; letter-spacing: 0.3rem; }
+            .sub-title { font-size: 0.7rem; letter-spacing: 0.2rem; }
+            .ornament-font { font-size: 2.5rem; }
+            .control-btn { width: 40px; height: 40px; font-size: 1rem; }
+            .music-btn { top: 20px; right: 20px; }
+            .title-container { top: 20px; }
+            .controls { bottom: 20px; gap: 8px; }
+            .page-num { font-size: 0.6rem; min-width: 100px; }
+            .gold-border { inset: 15px; }
+        }
+
+        /* Mobile Landscape Optimization */
+        @media (max-height: 500px) {
+            .album-wrapper {
+                height: 70vh;
+                width: calc(70vh * 2.44);
+            }
+            .title-container { top: 10px; transform: scale(0.7); }
+            .controls { bottom: 10px; transform: scale(0.8); }
+            .music-btn { top: 10px; right: 10px; transform: scale(0.8); }
+        }
     </style>
-
 </head>
-
 <body>
 
-<div class="title">
+    <div class="title-container">
+        <h1 class="main-title">Eternal Bond</h1>
+        <p class="sub-title">A Digital Wedding Memoir</p>
+    </div>
 
-    WEDDING MEMORIES
-
-</div>
-
-<div class="album-container"
-     id="container">
-
-    <div class="book"
-         id="book"></div>
-
-</div>
-
-<div class="controls">
-
-    <button class="btn"
-            id="prevBtn">
-
-        ⬅
-
+    <button class="control-btn music-btn" id="musicBtn" title="Toggle Background Music">
+        <span id="musicIcon">🎵</span>
     </button>
 
-    <button class="btn"
-            id="zoomIn">
-
-        ＋
-
-    </button>
-
-    <button class="btn"
-            id="zoomOut">
-
-        －
-
-    </button>
-
-    <button class="btn"
-            id="nextBtn">
-
-        ➡
-
-    </button>
-
-</div>
-
-<button class="btn music-btn"
-        id="musicBtn">
-
-    🎵
-
-</button>
-
-<audio id="bgMusic" loop>
-
-    <source src="assets/audio/wedding.mp3"
-            type="audio/mpeg">
-
-</audio>
-
-<script>
-
-    const params =
-        new URLSearchParams(window.location.search);
-
-    const data =
-        params.get("data");
-
-    let photos = [];
-
-    if(data){
-
-        const parsed =
-            JSON.parse(data);
-
-        photos =
-            parsed.map(
-                p => p.imageUrl
-            );
-    }
-
-    const book =
-        document.getElementById("book");
-
-    let currentSheet = 0;
-
-    let zoom = 1;
-
-    function createCover(){
-
-        return `
-
-        <div class="page-left">
-
-            <img src="${photos[0]}">
-
+    <div class="album-wrapper" id="albumWrapper">
+        <div class="book" id="book">
+            <!-- Pages will be injected here -->
         </div>
+    </div>
 
-        <div class="sheet"
-             style="z-index:${photos.length + 5}">
+    <div class="controls">
+        <button class="control-btn" id="zoomOutBtn" title="Zoom Out">-</button>
+        <button class="control-btn" id="prevBtn" title="Previous Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="page-num" id="pageDisplay">Loading...</span>
+        <button class="control-btn" id="nextBtn" title="Next Page">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <button class="control-btn" id="zoomInBtn" title="Zoom In">+</button>
+    </div>
 
-            <div class="page front cover">
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+    </audio>
 
-                <h1>OUR STORY</h1>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const dataParam = params.get("data");
+        
+        let photos = [
+            "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1519225495810-753b551f52d4?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1522673607200-1648832cee98?auto=format&fit=crop&q=80&w=1000",
+            "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=1000"
+        ];
 
-                <p>Wedding Memories</p>
-
-            </div>
-
-            <div class="page back">
-
-                <div class="photo-wrapper">
-
-                    <img src="${photos[1] || photos[0]}">
-
-                </div>
-
-            </div>
-
-        </div>
-        `;
-    }
-
-    function createSheets(){
-
-        let html = "";
-
-        let z = photos.length;
-
-        for(let i = 2; i < photos.length; i += 2){
-
-            const left = photos[i];
-
-            const right =
-                photos[i + 1] || left;
-
-            html += `
-
-            <div class="sheet"
-                 style="z-index:${z--}">
-
-                <div class="page front">
-
-                    <div class="photo-wrapper">
-
-                        <img src="${left}">
-
-                    </div>
-
-                </div>
-
-                <div class="page back">
-
-                    <div class="photo-wrapper">
-
-                        <img src="${right}">
-
-                    </div>
-
-                </div>
-
-            </div>
-            `;
-        }
-
-        return html;
-    }
-
-    function loadBook(){
-
-        book.innerHTML =
-            createCover() + createSheets();
-
-        initBook();
-    }
-
-    function initBook(){
-
-        const sheets =
-            document.querySelectorAll(".sheet");
-
-        function nextPage(){
-
-            if(currentSheet < sheets.length){
-
-                sheets[currentSheet]
-                    .classList.add("flipped");
-
-                currentSheet++;
-            }
-        }
-
-        function prevPage(){
-
-            if(currentSheet > 0){
-
-                currentSheet--;
-
-                sheets[currentSheet]
-                    .classList.remove("flipped");
-            }
-        }
-
-        document.getElementById("nextBtn")
-            .onclick = nextPage;
-
-        document.getElementById("prevBtn")
-            .onclick = prevPage;
-
-        sheets.forEach(sheet => {
-
-            sheet.addEventListener(
-                "click",
-                (e)=>{
-
-                    const rect =
-                        sheet.getBoundingClientRect();
-
-                    const x =
-                        e.clientX - rect.left;
-
-                    if(x > rect.width / 2){
-
-                        nextPage();
-
-                    }else{
-
-                        prevPage();
-                    }
+        if(dataParam) {
+            try {
+                const parsed = JSON.parse(dataParam);
+                if(Array.isArray(parsed) && parsed.length > 0) {
+                    photos = parsed.map(p => p.imageUrl || p);
                 }
-            );
-        });
-    }
-
-    /// ZOOM
-
-    document.getElementById("zoomIn")
-        .onclick = () => {
-
-        zoom += 0.1;
-
-        document.getElementById("container")
-            .style.transform =
-            `scale(${zoom})`;
-    };
-
-    document.getElementById("zoomOut")
-        .onclick = () => {
-
-        zoom -= 0.1;
-
-        if(zoom < 0.5)
-            zoom = 0.5;
-
-        document.getElementById("container")
-            .style.transform =
-            `scale(${zoom})`;
-    };
-
-    /// MUSIC
-
-    const music =
-        document.getElementById("bgMusic");
-
-    let playing = false;
-
-    document.getElementById("musicBtn")
-        .onclick = async () => {
-
-        if(!playing){
-
-            music.volume = 1;
-
-            music.play().catch(() => {
-
-                alert(
-                    "Tap again to enable music"
-                );
-            });
-
-            playing = true;
-
-        }else{
-
-            music.pause();
-
-            playing = false;
+            } catch(e) { console.error("Data parse error", e); }
         }
-    };
 
-    loadBook();
+        const book = document.getElementById('book');
+        const albumWrapper = document.getElementById('albumWrapper');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const pageDisplay = document.getElementById('pageDisplay');
+        const musicBtn = document.getElementById('musicBtn');
+        const musicIcon = document.getElementById('musicIcon');
+        const bgMusic = document.getElementById('bgMusic');
 
-</script>
+        let currentPage = 0;
+        let pages = [];
+        let zoomLevel = 1;
 
+        function createPageElement(contentFront, contentBack, zIndex) {
+            const page = document.createElement('div');
+            page.className = 'page';
+            page.style.zIndex = zIndex;
+            page.innerHTML = `
+                <div class="page-face front">${contentFront}</div>
+                <div class="page-face back">${contentBack}</div>
+            `;
+            return page;
+        }
+
+        function initBook() {
+            book.innerHTML = '';
+            pages = [];
+            if (photos.length === 0) return;
+
+            // 1. Cover
+            const coverFront = `
+                <div class="gold-border">
+                    <div class="ornament-font">Wedding</div>
+                    <div class="text-center">
+                        <div class="text-3xl tracking-[12px] uppercase mb-4 font-serif">Memories</div>
+                        <div class="h-[1px] w-48 bg-gold/50 mx-auto mb-4"></div>
+                        <div class="text-sm tracking-[6px] opacity-80 uppercase">A Love Story</div>
+                    </div>
+                </div>
+            `;
+            const coverBack = `<img src="${photos[0]}" class="photo-img">`;
+            const coverPage = createPageElement(coverFront, coverBack, photos.length + 10);
+            coverPage.querySelector('.front').classList.add('cover-front');
+            book.appendChild(coverPage);
+            pages.push(coverPage);
+
+            // 2. Middle
+            for (let i = 1; i < photos.length; i++) {
+                const frontContent = `<img src="${photos[i-1]}" class="photo-img">`;
+                const backContent = `<img src="${photos[i]}" class="photo-img">`;
+                const page = createPageElement(frontContent, backContent, photos.length - i + 5);
+                book.appendChild(page);
+                pages.push(page);
+            }
+
+            // 3. Final
+            const lastPhoto = photos[photos.length - 1];
+            const finalFront = `<img src="${lastPhoto}" class="photo-img">`;
+            const finalBack = `
+                <div class="gold-border">
+                    <div class="ornament-font">Thank You</div>
+                    <div class="text-center font-serif tracking-[5px]">THE END</div>
+                </div>
+            `;
+            const finalPage = createPageElement(finalFront, finalBack, 0);
+            finalPage.querySelector('.back').classList.add('cover-front');
+            book.appendChild(finalPage);
+            pages.push(finalPage);
+
+            updateUI();
+            pages.forEach((page, index) => {
+                page.addEventListener('click', () => {
+                    if (index === currentPage) nextPage();
+                    else if (index === currentPage - 1) prevPage();
+                });
+            });
+        }
+
+        function updateUI() {
+            pageDisplay.innerText = `Spread ${currentPage + 1} of ${pages.length}`;
+            albumWrapper.style.transform = `scale(${zoomLevel})`;
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length) {
+                const page = pages[currentPage];
+                page.style.zIndex = 100 + currentPage;
+                page.classList.add('flipped');
+                currentPage++;
+                updateUI();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                const page = pages[currentPage];
+                page.style.zIndex = 100 + currentPage;
+                page.classList.remove('flipped');
+                setTimeout(() => {
+                    if (!page.classList.contains('flipped')) {
+                        page.style.zIndex = pages.length - currentPage + 5;
+                    }
+                }, 600);
+                updateUI();
+            }
+        }
+
+        // Zoom
+        zoomInBtn.onclick = () => {
+            if (zoomLevel < 2.5) { zoomLevel += 0.1; updateUI(); }
+        };
+        zoomOutBtn.onclick = () => {
+            if (zoomLevel > 0.5) { zoomLevel -= 0.1; updateUI(); }
+        };
+
+        // Controls
+        nextBtn.onclick = nextPage;
+        prevBtn.onclick = prevPage;
+        document.onkeydown = (e) => {
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+        };
+
+        let playing = false;
+        musicBtn.onclick = () => {
+            if(!playing) { bgMusic.play(); musicIcon.innerText = "⏸️"; }
+            else { bgMusic.pause(); musicIcon.innerText = "🎵"; }
+            playing = !playing;
+        };
+
+        window.onload = initBook;
+    </script>
 </body>
 </html>
