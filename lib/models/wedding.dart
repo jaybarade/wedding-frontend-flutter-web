@@ -3,6 +3,7 @@ class Wedding {
   final String title;
   final String slug;
   final String? coverImage;
+  final String? musicUrl;
   final DateTime? createdAt;
 
   Wedding({
@@ -10,6 +11,7 @@ class Wedding {
     required this.title,
     required this.slug,
     this.coverImage,
+    this.musicUrl,
     this.createdAt,
   });
 
@@ -19,6 +21,7 @@ class Wedding {
       title: json['title'] ?? '',
       slug: json['slug'] ?? '',
       coverImage: json['coverImage'],
+      musicUrl: json['musicUrl'],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
     );
   }
@@ -29,6 +32,7 @@ class Wedding {
       'title': title,
       'slug': slug,
       'coverImage': coverImage,
+      'musicUrl': musicUrl,
       'createdAt': createdAt?.toIso8601String(),
     };
   }

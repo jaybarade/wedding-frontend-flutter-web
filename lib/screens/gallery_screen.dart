@@ -132,16 +132,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
                             ),
                           ),
                           onPressed: photos.isEmpty
-                              ? null
-                              : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    FlipBookHtml(photos: photos),
-                              ),
-                            );
-                          },
+                               ? null
+                               : () {
+                             Navigator.push(
+                               context,
+                               MaterialPageRoute(
+                                 builder: (_) =>
+                                     FlipBookHtml(photos: photos, musicUrl: data['musicUrl'], slug: widget.slug),
+                               ),
+                             );
+                           },
                           child: const Text(
                             "View Album",
                             style: TextStyle(
@@ -169,10 +169,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
 class FlipBookHtml extends StatefulWidget {
 
   final List photos;
+  final String slug;
+  final String? musicUrl;
 
   const FlipBookHtml({
     super.key,
     required this.photos,
+    required this.slug,
+    this.musicUrl,
   });
 
   @override
@@ -193,6 +197,7 @@ class _FlipBookHtmlState extends State<FlipBookHtml> {
 
     final jsonPhotos =
     Uri.encodeComponent(jsonEncode(widget.photos));
+    final music = widget.musicUrl != null ? Uri.encodeComponent(widget.musicUrl!) : "";
 
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(
@@ -202,7 +207,7 @@ class _FlipBookHtmlState extends State<FlipBookHtml> {
         final iframe = html.IFrameElement()
 
         /// ✅ FIXED
-          ..src = "/flipbook.html?data=$jsonPhotos"
+          ..src = "/flipbook.html?slug=${widget.slug}&data=$jsonPhotos&music=$music"
 
           ..style.border = "none"
 

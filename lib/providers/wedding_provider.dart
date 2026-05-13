@@ -12,6 +12,9 @@ import 'dart:convert';
 
 
 
+import 'package:http_parser/http_parser.dart';
+
+
 class WeddingProvider with ChangeNotifier {
   final String? token;
   List<Wedding> _myWeddings = [];
@@ -108,7 +111,7 @@ class WeddingProvider with ChangeNotifier {
     return null;
   }
 
-  Future<bool> uploadPhotos(int weddingId, List<PlatformFile> files) async {
+  Future<bool> uploadPhotos(int weddingId, List<PlatformFile> files, {PlatformFile? musicFile}) async {
     _isLoading = true;
     _uploadProgress = 0.0;
     notifyListeners();
@@ -125,7 +128,7 @@ class WeddingProvider with ChangeNotifier {
               'files',
               file.bytes!,
               filename: file.name,
-              contentType: http.MediaType('image', 'jpeg'), // 🔥 ADD THIS
+              contentType: MediaType('image', 'jpeg'),
             ),
           );
         } else {
@@ -133,6 +136,25 @@ class WeddingProvider with ChangeNotifier {
           http.MultipartFile.fromPath(
             'files',
             file.path!,
+          ));
+        }
+      }
+
+      // Add music file if selected
+      if (musicFile != null) {
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'music',
+              musicFile.bytes!,
+              filename: musicFile.name,
+              contentType: MediaType('audio', 'mpeg'),
+            ),
+          );
+        } else {
+          request.files.add(await http.MultipartFile.fromPath(
+            'music',
+            musicFile.path!,
           ));
         }
       }

@@ -24,6 +24,7 @@ class UploadPhotosScreen extends StatefulWidget {
 
 class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
   List<PlatformFile> _selectedFiles = [];
+  PlatformFile? _selectedMusic;
 
   void _pickFiles() async {
     final result = await FilePicker.platform.pickFiles(
@@ -35,11 +36,25 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
     }
   }
 
+  void _pickMusic() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3'],
+    );
+    if (result != null) {
+      setState(() => _selectedMusic = result.files.first);
+    }
+  }
+
   void _upload() async {
     if (_selectedFiles.isEmpty) return;
 
     final provider = Provider.of<WeddingProvider>(context, listen: false);
-    final success = await provider.uploadPhotos(widget.weddingId, _selectedFiles);
+    final success = await provider.uploadPhotos(
+      widget.weddingId,
+      _selectedFiles,
+      musicFile: _selectedMusic,
+    );
 
     if (success && mounted) {
       final wedding = provider.myWeddings.firstWhere((w) => w.id == widget.weddingId);
@@ -270,6 +285,16 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
                     label: const Text('Select Multiple Photos'
                         ,style: TextStyle(color: Colors.white)),
                     ),
+
+                  const SizedBox(height: 12),
+
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent),
+                    onPressed: _pickMusic,
+                    icon: const Icon(Icons.music_note ,color: Colors.white),
+                    label: Text(_selectedMusic != null ? 'Music: ${_selectedMusic!.name}' : 'Add Background Music (MP3)'
+                        ,style: const TextStyle(color: Colors.white)),
+                  ),
 
                   const SizedBox(height: 24),
                   if (_selectedFiles.isNotEmpty) ...[

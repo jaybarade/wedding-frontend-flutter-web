@@ -332,32 +332,35 @@
         <button class="control-btn" id="zoomInBtn" title="Zoom In">+</button>
     </div>
 
-    <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+    <audio id="bgMusic" loop preload="auto">
+        <!-- Source will be set via JS -->
     </audio>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const dataParam = params.get("data");
+        const musicParam = params.get("music");
+        const slugParam = params.get("slug");
         
         let photos = [
             "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=1000",
             "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1000",
             "https://images.unsplash.com/photo-1519225495810-753b551f52d4?auto=format&fit=crop&q=80&w=1000",
             "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1522673607200-1648832cee98?auto=format&fit=crop&q=80&w=1000",
-            "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=1000"
+            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=1000"
         ];
 
-        if(dataParam) {
-            try {
-                const parsed = JSON.parse(dataParam);
-                if(Array.isArray(parsed) && parsed.length > 0) {
-                    photos = parsed.map(p => p.imageUrl || p);
-                }
-            } catch(e) { console.error("Data parse error", e); }
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicBtn = document.getElementById('musicBtn');
+
+        // 🔥 Set Music from API
+        if (musicParam && musicParam !== "null" && musicParam !== "") {
+            console.log("🎵 Setting music source:", musicParam);
+            bgMusic.src = musicParam;
+        } else {
+            // Fallback if no music provided
+            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3";
         }
 
         const book = document.getElementById('book');
@@ -367,13 +370,51 @@
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
         const pageDisplay = document.getElementById('pageDisplay');
-        const musicBtn = document.getElementById('musicBtn');
-        const musicIcon = document.getElementById('musicIcon');
-        const bgMusic = document.getElementById('bgMusic');
 
         let currentPage = 0;
         let pages = [];
         let zoomLevel = 1;
+
+        // 🔥 Fetch Data by Slug if provided
+        async function fetchWeddingData(slug) {
+            try {
+                pageDisplay.innerText = "Fetching album data...";
+                const response = await fetch(`https://wedding-album-42gg.onrender.com/api/public/weddings/${slug}`);
+                const data = await response.json();
+                
+                if (data.photos && data.photos.length > 0) {
+                    photos = data.photos.map(p => p.imageUrl || p);
+                    console.log("📸 Fetched photos:", photos.length);
+                }
+                
+                if (data.musicUrl && data.musicUrl !== "null") {
+                    console.log("🎵 Fetched music URL:", data.musicUrl);
+                    bgMusic.src = data.musicUrl;
+                }
+                
+                initBook();
+            } catch (error) {
+                console.error("Fetch error:", error);
+                pageDisplay.innerText = "Error loading album";
+                initBook(); // Try with defaults
+            }
+        }
+
+        function init() {
+            if (slugParam) {
+                fetchWeddingData(slugParam);
+            } else if (dataParam) {
+                try {
+                    const parsed = JSON.parse(decodeURIComponent(dataParam));
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        photos = parsed.map(p => p.imageUrl || p);
+                    }
+                } catch (e) { console.error("Data parse error", e); }
+                initBook();
+            } else {
+                initBook();
+            }
+        }
 
         function createPageElement(contentFront, contentBack, zIndex) {
             const page = document.createElement('div');
@@ -493,7 +534,7 @@
             playing = !playing;
         };
 
-        window.onload = initBook;
+        window.onload = init;
     </script>
 </body>
 </html>
