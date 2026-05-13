@@ -96,11 +96,12 @@ class WeddingProvider with ChangeNotifier {
         } catch (jsonError) {
           // ❌ JSON ERROR HANDLE
           print("JSON PARSE ERROR: $jsonError");
+          print("RAW RESPONSE FOR ERROR: ${response.body}");
 
-          _error = "Server returned invalid JSON";
+          _error = "Server returned invalid JSON: $jsonError\nBody: ${response.body.length > 100 ? response.body.substring(0, 100) + '...' : response.body}";
         }
       } else {
-        _error = "Failed: ${response.statusCode}\n${response.body}";
+        _error = "Server Error: ${response.statusCode}\n${response.body.isEmpty ? 'No message' : response.body}";
       }
     } catch (e) {
       _error = "Error: $e";
