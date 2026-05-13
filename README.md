@@ -14,6 +14,17 @@ This platform allows photographers or wedding clients to:
 The system works like a professional **E-Wedding Album Generator** for photographers and studios.
 
 ---
+# Wedding App
+
+## Live Demo website
+
+[Open Live Website](https://weddingapp-7d3ee.web.app/)
+
+### Album QR Code
+
+![Wedding App QR](wedding_jay_qr.png)
+
+---
 
 # 🌐 Live Features
 
@@ -30,9 +41,7 @@ The system works like a professional **E-Wedding Album Generator** for photograp
 
 ---
 
-## Live Demo
 
-https://weddingapp-7d3ee.web.app/
 
 
 # 🖥️ Tech Stack
